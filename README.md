@@ -50,7 +50,7 @@ Edit your configuration file (usually found at `%APPDATA%\Claude\claude_desktop_
     "shortcut": {
       "command": "node",
       "args": [
-        "C:\\Users\\Moyo\\Documents\\Projects\\shortcut-mcp\\dist\\index.js"
+        "C:\\path\\to\\shortcut-mcp\\dist\\index.js"
       ],
       "env": {
         "SHORTCUT_API_TOKEN": "your-token-here"
@@ -72,12 +72,12 @@ Cursor currently supports adding MCP servers via its settings panel.
 4.  Fill in the details:
     -   **Name**: `shortcut`
     -   **Type**: `command` (or stdio)
-    -   **Command**: `node C:\Users\Moyo\Documents\Projects\shortcut-mcp\dist\index.js`
+    -   **Command**: `node C:\path\to\shortcut-mcp\dist\index.js`
 5.  **Important**: Currently, Cursor UI might not have a dedicated field for Environment Variables for every server type yet. If it doesn't, you can create a wrapper script or use `cross-env` in the command:
     
     **Command**: 
     ```bash
-    npx -y cross-env SHORTCUT_API_TOKEN=your-token-here node C:\Users\Moyo\Documents\Projects\shortcut-mcp\dist\index.js
+    npx -y cross-env SHORTCUT_API_TOKEN=your-token-here node C:\path\to\shortcut-mcp\dist\index.js
     ```
 
 ### 3. VS Code (Generic MCP Extension)
@@ -91,7 +91,7 @@ If you are using an MCP extension for VS Code (like "MCP Server" or similar):
 "mcp.servers": {
     "shortcut": {
         "command": "node",
-        "arguments": ["C:\\Users\\Moyo\\Documents\\Projects\\shortcut-mcp\\dist\\index.js"],
+        "arguments": ["C:\\path\\to\\shortcut-mcp\\dist\\index.js"],
         "env": {
             "SHORTCUT_API_TOKEN": "your-token-here"
         }
@@ -108,7 +108,7 @@ For other clients, lookup their MCP configuration file (often `mcp_config.json` 
   "mcpServers": {
     "shortcut": {
       "command": "node",
-      "args": ["C:/Users/Moyo/Documents/Projects/shortcut-mcp/dist/index.js"],
+      "args": ["/path/to/shortcut-mcp/dist/index.js"],
       "env": {
         "SHORTCUT_API_TOKEN": "your-token-here"
       }
