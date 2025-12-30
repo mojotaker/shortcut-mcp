@@ -135,6 +135,23 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["query"],
         },
       },
+      {
+        name: "update_story",
+        description: "Update a Story in Shortcut (move to new state, change name/description, etc)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            story_id: { type: "integer", description: "ID of the story to update" },
+            name: { type: "string", description: "New title of the story" },
+            description: { type: "string", description: "New description of the story" },
+            workflow_state_id: { type: "integer", description: "New Workflow state ID" },
+            archived: { type: "boolean", description: "Archive the story" },
+            group_id: { type: "string", description: "New Group (Team) ID" },
+            epic_id: { type: "integer", description: "New Epic ID" },
+          },
+          required: ["story_id"],
+        },
+      },
        {
         name: "list_workflows",
         description: "List all workflows and their states. Use this to find workflow_state_id.",
@@ -251,6 +268,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: JSON.stringify(workflows, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "update_story": {
+        const { story_id, name, description, workflow_state_id, archived, group_id, epic_id } = request.params.arguments as any;
+        const response = await client.put(`/stories/${story_id}`, {
+          name,
+          description,
+          workflow_state_id,
+          archived,
+          group_id,
+          epic_id
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(response.data, null, 2),
             },
           ],
         };

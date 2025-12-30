@@ -8,6 +8,7 @@ A Model Context Protocol (MCP) server that interfaces with the Shortcut Project 
 - **Create Story**: Create a new Story/Ticket (`create_story`)
 - **Create Task**: Create a Task within a Story (`create_task`)
 - **Get Story**: Retrieve story details (`get_story`)
+- **Update Story**: Update story details or move states (`update_story`)
 - **Search Stories**: Search for stories (`search_stories`)
 - **List Workflows**: List workflows and states to get `workflow_state_id` (`list_workflows`)
 
