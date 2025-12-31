@@ -9,6 +9,7 @@ A Model Context Protocol (MCP) server that interfaces with the Shortcut Project 
 - **Create Task**: Create a Task within a Story (`create_task`)
 - **List Members**: Get member UUIDs (and Group IDs) for assignment (`list_members`)
 - **List Groups**: List all groups (teams) to get `group_id` (`list_groups`)
+- **Add Comment**: Add a comment to a story (`add_story_comment`)
 - **Update Story**: Update story details or move states (`update_story`)
 - **Search Stories**: Search for stories (`search_stories`)
 - **List Workflows**: List workflows and states to get `workflow_state_id` (`list_workflows`)

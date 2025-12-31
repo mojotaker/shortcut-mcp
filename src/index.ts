@@ -148,6 +148,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             archived: { type: "boolean", description: "Archive the story" },
             group_id: { type: "string", description: "New Group (Team) ID" },
             epic_id: { type: "integer", description: "New Epic ID" },
+            custom_fields: { 
+              type: "array", 
+              description: "Array of custom fields to update",
+              items: {
+                type: "object",
+                properties: {
+                  field_id: { type: "string" },
+                  value_id: { type: "string" },
+                  value: { type: "string" }
+                }
+              }
+            },
           },
           required: ["story_id"],
         },
@@ -213,6 +225,28 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         inputSchema: {
           type: "object",
           properties: {},
+        },
+      },
+      {
+        name: "list_custom_fields",
+        description: "List all custom fields in the workspace",
+        inputSchema: {
+          type: "object",
+          properties: {
+             query: { type: "string", description: "Search query for field name" },
+          },
+        },
+      },
+      {
+        name: "add_story_comment",
+        description: "Add a comment to a Story",
+        inputSchema: {
+          type: "object",
+          properties: {
+            story_id: { type: "integer", description: "ID of the story" },
+            text: { type: "string", description: "The comment text" },
+          },
+          required: ["story_id", "text"],
         },
       },
     ],
@@ -329,14 +363,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "update_story": {
-        const { story_id, name, description, workflow_state_id, archived, group_id, epic_id } = request.params.arguments as any;
+        const { story_id, name, description, workflow_state_id, archived, group_id, epic_id, custom_fields } = request.params.arguments as any;
         const response = await client.put(`/stories/${story_id}`, {
           name,
           description,
           workflow_state_id,
           archived,
           group_id,
-          epic_id
+          epic_id,
+          custom_fields
         });
         return {
           content: [
@@ -443,6 +478,51 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: JSON.stringify(groups, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "list_custom_fields": {
+        const { query } = request.params.arguments as any;
+        const response = await client.get("/custom-fields");
+        let fields = response.data.map((f: any) => ({
+            id: f.id,
+            name: f.name,
+            description: f.description,
+            values: f.values ? f.values.map((v: any) => ({
+                id: v.id,
+                value: v.value,
+                position: v.position,
+                color_key: v.color_key
+            })) : []
+        }));
+
+        if (query) {
+            const lowerQuery = query.toLowerCase();
+            fields = fields.filter((f: any) => f.name.toLowerCase().includes(lowerQuery));
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(fields, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "add_story_comment": {
+        const { story_id, text } = request.params.arguments as any;
+        const response = await client.post(`/stories/${story_id}/comments`, {
+          text,
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(response.data, null, 2),
             },
           ],
         };
