@@ -160,6 +160,53 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: "list_stories",
+        description: "List all stories, optionally filtered by workflow state",
+        inputSchema: {
+          type: "object",
+          properties: {
+            workflow_state_id: { type: "integer", description: "Filter by workflow state ID" },
+            page_size: { type: "integer", description: "Number of results (default: 25)" },
+          },
+        },
+      },
+      {
+        name: "assign_story",
+        description: "Assign a story to one or more team members",
+        inputSchema: {
+          type: "object",
+          properties: {
+            story_id: { type: "integer", description: "ID of the story to assign" },
+            owner_ids: { 
+              type: "array", 
+              items: { type: "string" },
+              description: "Array of member UUIDs to assign as owners" 
+            },
+          },
+          required: ["story_id", "owner_ids"],
+        },
+      },
+      {
+        name: "link_story_epic",
+        description: "Link a story to an epic",
+        inputSchema: {
+          type: "object",
+          properties: {
+            story_id: { type: "integer", description: "ID of the story" },
+            epic_id: { type: "integer", description: "ID of the epic to link to (use null to unlink)" },
+          },
+          required: ["story_id", "epic_id"],
+        },
+      },
+      {
+        name: "list_members",
+        description: "List all members in the workspace to get member UUIDs for assignment",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
     ],
   };
 });
@@ -288,6 +335,85 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: "text",
               text: JSON.stringify(response.data, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "list_stories": {
+        const { workflow_state_id, page_size } = request.params.arguments as any;
+        // Use search endpoint with empty query to list stories
+        const response = await client.get("/search/stories", {
+          params: {
+            query: workflow_state_id ? `state:${workflow_state_id}` : "",
+            page_size: page_size || 25,
+          },
+        });
+        // Simplify output
+        const stories = response.data.data.map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          story_type: s.story_type,
+          workflow_state_id: s.workflow_state_id,
+          owner_ids: s.owner_ids,
+          epic_id: s.epic_id,
+          app_url: s.app_url,
+        }));
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(stories, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "assign_story": {
+        const { story_id, owner_ids } = request.params.arguments as any;
+        const response = await client.put(`/stories/${story_id}`, {
+          owner_ids,
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Story ${story_id} assigned to ${owner_ids.length} owner(s). Updated at: ${response.data.updated_at}`,
+            },
+          ],
+        };
+      }
+
+      case "link_story_epic": {
+        const { story_id, epic_id } = request.params.arguments as any;
+        const response = await client.put(`/stories/${story_id}`, {
+          epic_id,
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: epic_id 
+                ? `Story ${story_id} linked to Epic ${epic_id}. Updated at: ${response.data.updated_at}`
+                : `Story ${story_id} unlinked from any epic. Updated at: ${response.data.updated_at}`,
+            },
+          ],
+        };
+      }
+
+      case "list_members": {
+        const response = await client.get("/members");
+        const members = response.data.map((m: any) => ({
+          id: m.id,
+          name: m.profile.name,
+          mention_name: m.profile.mention_name,
+          email: m.profile.email_address,
+        }));
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(members, null, 2),
             },
           ],
         };
