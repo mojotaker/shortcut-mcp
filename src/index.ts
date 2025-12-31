@@ -207,6 +207,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: "list_groups",
+        description: "List all groups (teams) in the workspace",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
     ],
   };
 });
@@ -408,12 +416,33 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           name: m.profile.name,
           mention_name: m.profile.mention_name,
           email: m.profile.email_address,
+          group_ids: m.group_ids,
         }));
         return {
           content: [
             {
               type: "text",
               text: JSON.stringify(members, null, 2),
+            },
+          ],
+        };
+      }
+
+      case "list_groups": {
+        const response = await client.get("/groups");
+        const groups = response.data.map((g: any) => ({
+          id: g.id,
+          name: g.name,
+          mention_name: g.mention_name,
+          description: g.description,
+          num_stories_started: g.num_stories_started,
+          num_stories: g.num_stories,
+        }));
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(groups, null, 2),
             },
           ],
         };
